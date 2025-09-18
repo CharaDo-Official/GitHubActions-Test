@@ -27,8 +27,6 @@ Voltaをいれていくー
 - `volta --version`  
   - 2.0.2  
 
-== このへんからfrontディレクトリでやったほうがいいかも==  
-
 #### 1.2 Node,npmをいれよー
 node-20.18.0くんがいましたが、アンストしました  
 - 「インストールされているアプリ」から削除  
@@ -42,6 +40,8 @@ Nodeをいれましょう、npmも自動で入るみたい
   - v22.19.0  
 - `npm --version`  
   - 10.9.3  
+
+== このへんからtypescript-demoディレクトリを作成してそこで作業==  
 
 #### 1.3 TypeScript
 ##### 1.3.1 導入
@@ -67,11 +67,11 @@ tsconfig.jsonを初期化(frontで)
   - .tsx : TypeScript+JSX  
 
 実作  
-- ./index.html  
-- ./src/main.ts  
+- ./typescript-demo/index.html  
+- ./typescript-demo/src/main.ts  
 
 実行  
-- `npx vite`
+- `npx vite` (typescript-demoディレクトリで行ってください)  
 
 #### 1.4 React
 ##### 1.4.1 導入 

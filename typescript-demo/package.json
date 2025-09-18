@@ -1,5 +1,5 @@
 {
-  "name": "githubactions-test",
+  "name": "typescript-demo",
   "version": "1.0.0",
   "description": "CIテスト",
   "main": "dist/index.js",
@@ -11,7 +11,7 @@
     "url": "git+https://github.com/CharaDo-Official/GitHubActions-Test.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "mitomen",
   "license": "ISC",
   "type": "module",
   "bugs": {
