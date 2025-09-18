@@ -47,7 +47,7 @@ Nodeをいれましょう、npmも自動で入るみたい
 ##### 1.3.1 導入
 TypeScriptをプロジェクトディレクトリに入れる  
 - `npm install --save-dev typescript`  
-  - package.jsonが追加される  
+  - node_modules, package.jsonが追加される  
 
 tsconfig.jsonを初期化(frontで)  
 - `npx tsc --init`  
