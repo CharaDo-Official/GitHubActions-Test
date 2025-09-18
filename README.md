@@ -95,3 +95,8 @@ Reactを入れる
   - .ts : TypeScript  
   - .tsx : TypeScript+JSX(Reactを使う際に必要)  
 
+実作
+- ./tauri-demo/front/index.html
+- ./tauri-demo/front/src/main.tsx
+- ./tauri-demo/front/src/TodoApp.tsx
+- ./tauri-demo/front/tsconfig.json <-あまりにもエラーが出た
