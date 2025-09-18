@@ -1,0 +1,36 @@
+{
+  "name": "githubactions-test",
+  "version": "1.0.0",
+  "description": "CIテスト",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CharaDo-Official/GitHubActions-Test.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/CharaDo-Official/GitHubActions-Test/issues"
+  },
+  "homepage": "https://github.com/CharaDo-Official/GitHubActions-Test#readme",
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "vite": "^7.1.6"
+  },
+  "dependencies": {
+    "esbuild": "^0.25.10",
+    "fdir": "^6.5.0",
+    "nanoid": "^3.3.11",
+    "picocolors": "^1.1.1",
+    "picomatch": "^4.0.3",
+    "postcss": "^8.5.6",
+    "rollup": "^4.50.2",
+    "source-map-js": "^1.2.1",
+    "tinyglobby": "^0.2.15"
+  }
+}
