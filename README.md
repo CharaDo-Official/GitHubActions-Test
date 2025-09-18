@@ -45,7 +45,7 @@ Nodeをいれましょう、npmも自動で入るみたい
 #### 1.3 TypeScript
 ##### 1.3.1 導入
 依存パッケージをインストールするための下準備
-- npm init -y
+- `npm init -y`
 
 TypeScriptをプロジェクトディレクトリに入れる  
 - `npm install --save-dev typescript`  
@@ -76,12 +76,22 @@ tsconfig.jsonを初期化(frontで)
 - `npx vite` (typescript-demoディレクトリで行ってください)  
 
 ==新しくreact-demoディレクトリを作成して、その中で作業==  
-==その際、
+==その際、./react-demo/frontにおいて1.3から作業をやり直しています==
 
-### 2 Tauri導入まで
+### 2 TypeScript + React + Tauri 導入まで
 #### 2.1 React
 ##### 2.1.1 導入  
-
 Reactを入れる  
 - `npm install react react-dom`  
-- `npm install --save-dev @types/react @types/react-dom`  
+- `npm install --save-dev @types/react @types/react-dom @vitejs/plugin-react`  
+  - node_modules
+
+##### 2.1.2 チュートリアル
+公式ドキュメント
+- https://ja.react.dev/
+
+.tsと.tsxの違い
+- https://note.com/happy_avocet7237/n/n8f7893ccda84  
+  - .ts : TypeScript  
+  - .tsx : TypeScript+JSX(Reactを使う際に必要)  
+
