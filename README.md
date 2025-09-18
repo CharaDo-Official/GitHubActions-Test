@@ -8,6 +8,7 @@
 - Node.js
 - npm
 - TypeScript
+- Vite
 - React
 
 
