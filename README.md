@@ -11,9 +11,8 @@
 - Vite
 - React
 
-
-### 1 フロント 
-#### 1.1 Nodeのバージョン管理  
+### 1 TypeScript導入まで
+#### 1.1 Volta 
 バージョン管理アプリといってもいろいろあるらしい  
 - https://qiita.com/tak8_al/items/791e8d032bdc13a135de  
   - Voltaでいくー  
@@ -27,7 +26,7 @@ Voltaをいれていくー
 - `volta --version`  
   - 2.0.2  
 
-#### 1.2 Node,npmをいれよー
+#### 1.2 Node,npm
 node-20.18.0くんがいましたが、アンストしました  
 - 「インストールされているアプリ」から削除  
 - `rd /s /q "C:\Program Files\nodejs"`  
@@ -41,13 +40,16 @@ Nodeをいれましょう、npmも自動で入るみたい
 - `npm --version`  
   - 10.9.3  
 
-== このへんからtypescript-demoディレクトリを作成してそこで作業==  
+==このへんからtypescript-demoディレクトリを作成してそこで作業==  
 
 #### 1.3 TypeScript
 ##### 1.3.1 導入
+依存パッケージをインストールするための下準備
+- npm init -y
+
 TypeScriptをプロジェクトディレクトリに入れる  
 - `npm install --save-dev typescript`  
-  - node_modules, package.jsonが追加される  
+  - node_modules
 
 tsconfig.jsonを初期化(frontで)  
 - `npx tsc --init`  
@@ -73,8 +75,13 @@ tsconfig.jsonを初期化(frontで)
 実行  
 - `npx vite` (typescript-demoディレクトリで行ってください)  
 
-#### 1.4 React
-##### 1.4.1 導入 
-Reactを入れる
+==新しくreact-demoディレクトリを作成して、その中で作業==  
+==その際、
+
+### 2 Tauri導入まで
+#### 2.1 React
+##### 2.1.1 導入  
+
+Reactを入れる  
 - `npm install react react-dom`  
-- `npm install --save-dev @types/react @types/react-dom` 
+- `npm install --save-dev @types/react @types/react-dom`  
