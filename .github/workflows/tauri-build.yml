@@ -9,6 +9,7 @@ on:
 env:
   TAURI_DIR: ./tauri-demo 
   FRONT_DIR: ./tauri-demo/front
+  TAURI_BUNDLES: msi
 
 #PR番号が被ったとき、古いActionsを自動停止してくれるらしい
 concurrency:
