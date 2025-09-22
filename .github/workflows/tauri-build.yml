@@ -9,12 +9,6 @@ on:
 env:
   TAURI_DIR: ./tauri-demo 
   FRONT_DIR: ./tauri-demo/front
-  TAURI_BUNDLES: msi
-
-#PR番号が被ったとき、古いActionsを自動停止してくれるらしい
-concurrency:
-  group: tauri-build-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build-msi:
@@ -34,10 +28,9 @@ jobs:
       - name: install-frontend
         run: npm ci
         working-directory: ${{ env.FRONT_DIR }}
-      
-      - name: build-frontend
+      - name: build frontend
         run: npm run build
-        working-directory: ${{ env.FRONT_DIR }}
+        working-directory: ./tauri-demo/front
 
       - name: tauri-build
         run: npx tauri build
