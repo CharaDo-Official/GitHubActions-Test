@@ -1,10 +1,8 @@
 name: tauri-build
 
 on:
-  #pull_request:
-    #branches: [ main, develop, 'feat/*/*' ]
   push:
-    branches: [ 'feat/**' ]
+    branches: [ 'feat/**', main, develop ]
   workflow_dispatch:
 
 #ディレクトリ構成に応じて変更してください
