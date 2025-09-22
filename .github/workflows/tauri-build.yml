@@ -14,7 +14,7 @@ env:
 
 #PR番号が被ったとき、古いActionsを自動停止してくれるらしい
 concurrency:
-  group: pr-build-${{ github.event.pull_request.number || github.ref }}
+  group: tauri-build-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
