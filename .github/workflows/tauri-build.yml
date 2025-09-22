@@ -4,7 +4,7 @@ on:
   #pull_request:
     #branches: [ main, develop, 'feat/*/*' ]
   push:
-    branches: [ main, develop, 'feat/*/*' ]
+    branches: [ 'feat/*/*' ]
   workflow_dispatch:
 
 #ディレクトリ構成に応じて変更してください
