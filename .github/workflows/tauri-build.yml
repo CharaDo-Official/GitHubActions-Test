@@ -4,7 +4,7 @@ on:
   #pull_request:
     #branches: [ main, develop, 'feat/*/*' ]
   push:
-    branches: [ 'feat/*/*' ]
+    branches: [ 'feat/**' ]
   workflow_dispatch:
 
 #ディレクトリ構成に応じて変更してください
@@ -14,7 +14,7 @@ env:
 
 #PR番号が被ったとき、古いActionsを自動停止してくれるらしい
 concurrency:
-  group: pr-build-${{ github.event.pull_request.number }}
+  group: pr-build-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
