@@ -1,14 +1,15 @@
 name: tauri-build
 
+# 要相談
 on:
-  push:
+  pull_request:
     branches: [ 'feat/**', main, develop ]
   workflow_dispatch:
 
 #ディレクトリ構成に応じて変更してください
 env:
   TAURI_DIR: ./tauri-demo 
-  FRONT_DIR: ./tauri-demo/front
+  FRONT_DIR: ./tauri-demo/front5
 
 #PR番号が被ったとき、古いActionsを自動停止してくれるらしい
 concurrency:
@@ -19,34 +20,42 @@ jobs:
   build-msi:
     runs-on: windows-latest
     steps:
+      # 開発環境の構築
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
       - uses: dtolnay/rust-toolchain@stable
 
+      # node_modulesキャッシュ
       - uses: actions/cache@v4
         with:
           path: ${{ env.FRONT_DIR }}/node_modules
           key: ${{ runner.os }}-npm-${{ hashFiles(format('{0}/package-lock.json', env.FRONT_DIR)) }}
           restore-keys: ${{ runner.os }}-npm-
       
+      # frontendのnode_modulesインストール
       - name: install-frontend
         run: npm ci
         working-directory: ${{ env.FRONT_DIR }}
+      
+      # frontendのビルド
       - name: build frontend
         run: npm run build
         working-directory: ./tauri-demo/front
 
+      # tauriのビルド
       - name: tauri-build
         run: npx tauri build
         working-directory: ${{ env.TAURI_DIR }}
       
+      # .msi収集
       - name: collect-msi
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist | Out-Null
           Get-ChildItem -Recurse "${{ env.TAURI_DIR }}\src-tauri\target\**\bundle\msi\*.msi" | Copy-Item -Destination dist
 
+      # .msiアップロード
       - name: upload-artifact
         uses: actions/upload-artifact@v4
         with:
