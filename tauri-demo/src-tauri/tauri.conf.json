@@ -5,7 +5,7 @@
   "identifier": "com.charado.frontdemo",
   "build": {
     "beforeDevCommand": "npm run dev --prefix ./front",
-    "beforeBuildCommand": "npm run build --prefix ./front",
+    "beforeBuildCommand": "node -e \"try{require('fs').rmSync('src-tauri/target',{recursive:true,force:true})}catch(e){}\" && npm run build --prefix ./front",
     "devUrl": "http://localhost:5173",
     "frontendDist": "../front/dist"
   },
