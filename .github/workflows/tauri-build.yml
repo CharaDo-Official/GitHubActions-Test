@@ -45,6 +45,8 @@ jobs:
         run: npm run build
         working-directory: ./tauri-demo/front
 
+#========================== Actions側のWindows環境で、PR番号別にバージョン情報を変えることで異なる成果物を作成 ==========================#
+
       # 実行時バージョン生成（例: 0.1.1234567）
       - name: compute-version
         id: ver
@@ -128,3 +130,5 @@ jobs:
             echo "- PR: #${{ github.event.pull_request.number }}"
             echo "- Commit: \`${{ github.sha }}\`"
           } >> $GITHUB_STEP_SUMMARY
+
+#========================== Actions側のWindows環境で、PR番号別にバージョン情報を変えることで異なる成果物を作成 ==========================#

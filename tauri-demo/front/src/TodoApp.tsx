@@ -14,7 +14,7 @@ export default function App() {
 
   return (
     <div>
-      <h1>Todo React</h1>
+      <h1>Tauri-Proto</h1>
       <form onSubmit={onSubmit}>
         <input ref={inputRef} id="textInput" type="text" placeholder="To Do" />
         <button type="submit">追加</button>
