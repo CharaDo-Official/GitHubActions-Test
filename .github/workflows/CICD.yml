@@ -38,7 +38,7 @@ jobs:
       
       # frontendのnode_modulesインストール
       - name: install-frontend
-        run: npm ci
+        run: npm install
         working-directory: ${{ env.FRONT_DIR }}
       
       # ESLintチェック
