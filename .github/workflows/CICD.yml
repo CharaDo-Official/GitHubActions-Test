@@ -1,4 +1,4 @@
-name: tauri-build
+name: CI/CD
 
 # 要相談
 on:
@@ -22,17 +22,18 @@ jobs:
   build-msi:
     runs-on: windows-latest
     steps:
-      # 開発環境の構築
+      # 環境の構築
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with:
+          node-version: 20
       - uses: dtolnay/rust-toolchain@stable
 
       # node_modulesキャッシュ
       - uses: actions/cache@v4
         with:
           path: ${{ env.FRONT_DIR }}/node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles(format('{0}/package-lock.json', env.FRONT_DIR)) }}
+          key: ${{ runner.os }}-npm-${{ hashFiles(env.FRONT_DIR + '/package-lock.json') }}
           restore-keys: ${{ runner.os }}-npm-
       
       # frontendのnode_modulesインストール
@@ -40,6 +41,11 @@ jobs:
         run: npm ci
         working-directory: ${{ env.FRONT_DIR }}
       
+      # ESLintチェック
+      - name: run ESLint
+        run: npx eslint . --ext .ts,.tsx,.js,.jsx
+        working-directory: ${{ env.FRONT_DIR }}
+
       # frontendビルド
       - name: build frontend
         run: npm run build
@@ -95,6 +101,8 @@ jobs:
             Get-ChildItem -Path ".\target" -Recurse -Include bundle | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
           }
 
+#========================== Actions側のWindows環境で、PR番号別にバージョン情報を変えることで異なる成果物を作成 ==========================#
+
       # tauriビルド
       - name: tauri-build
         run: >
@@ -113,6 +121,7 @@ jobs:
             Sort-Object LastWriteTime -Descending | Select-Object -First 2 |
             Copy-Item -Destination dist
       
+      # 成果物(msi)アップロード
       - name: upload-artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -120,15 +129,3 @@ jobs:
           path: |
             dist/*.msi
             version.txt
-
-      - name: job-summary
-        shell: bash
-        run: |
-          {
-            echo "## Tauri MSI Build"
-            echo "- Version: **${{ steps.ver.outputs.version }}**"
-            echo "- PR: #${{ github.event.pull_request.number }}"
-            echo "- Commit: \`${{ github.sha }}\`"
-          } >> $GITHUB_STEP_SUMMARY
-
-#========================== Actions側のWindows環境で、PR番号別にバージョン情報を変えることで異なる成果物を作成 ==========================#
