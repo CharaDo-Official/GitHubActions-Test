@@ -87,7 +87,7 @@ jobs:
       # targetディレクトリクリーンアップ
       - name: clean-old-bundles
         shell: pwsh
-        working-directory: ${{ env:TAURI_DIR }}/src-tauri
+        working-directory: ${{ env.TAURI_DIR }}/src-tauri
         run: |
           if (Test-Path ".\target") {
             Get-ChildItem -Path ".\target" -Recurse -Include bundle | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
