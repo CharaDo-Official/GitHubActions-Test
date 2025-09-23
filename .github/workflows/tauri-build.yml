@@ -1,0 +1,134 @@
+name: tauri-build
+
+# 要相談
+on:
+  pull_request:
+    branches: [ main, dev ]
+  push:
+    branches: [ 'feat/**']
+  workflow_dispatch:
+
+#ディレクトリ構成に応じて変更してください
+env:
+  TAURI_DIR: ./tauri-demo 
+  FRONT_DIR: ./tauri-demo/front
+
+#PR番号が被ったとき、古いActionsを自動停止してくれるらしい
+concurrency:
+  group: tauri-build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-msi:
+    runs-on: windows-latest
+    steps:
+      # 開発環境の構築
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: dtolnay/rust-toolchain@stable
+
+      # node_modulesキャッシュ
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.FRONT_DIR }}/node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles(format('{0}/package-lock.json', env.FRONT_DIR)) }}
+          restore-keys: ${{ runner.os }}-npm-
+      
+      # frontendのnode_modulesインストール
+      - name: install-frontend
+        run: npm ci
+        working-directory: ${{ env.FRONT_DIR }}
+      
+      # frontendビルド
+      - name: build frontend
+        run: npm run build
+        working-directory: ./tauri-demo/front
+
+#========================== Actions側のWindows環境で、PR番号別にバージョン情報を変えることで異なる成果物を作成 ==========================#
+
+      # 実行時バージョン生成（例: 0.1.1234567）
+      - name: compute-version
+        id: ver
+        shell: pwsh
+        working-directory: ${{ env.TAURI_DIR }}
+        run: |
+          $jsonPath = "src-tauri/tauri.conf.json"
+          $conf = Get-Content $jsonPath -Raw | ConvertFrom-Json
+          $base = $conf.version; if (-not $base) { $base = "0.1.0" }
+          $p = $base.Split('.')
+          $major = [int]$p[0]
+          $minor = if ($p.Length -ge 2) { [int]$p[1] } else { 1 }
+          $pr = ${env:GITHUB_EVENT_NUMBER}; if (-not $pr) { $pr = 0 }
+          $run = ${env:GITHUB_RUN_NUMBER}
+          $patch = [int]("$pr$($run % 10000)")
+          "version=$major.$minor.$patch" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      # Tauri v2: バージョン上書き
+      - name: make-override-config
+        id: ov
+        shell: pwsh
+        working-directory: ${{ env.TAURI_DIR }}
+        run: |
+          New-Item -ItemType Directory -Force -Path runtime | Out-Null
+          $override = @{ version = "${{ steps.ver.outputs.version }}" } | ConvertTo-Json -Depth 5
+          $path = "runtime/tauri.version.override.json"
+          $override | Out-File -FilePath $path -Encoding utf8
+          "path=$path" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      # Cargo.toml の version を実行時だけ合わせる（コミットされない）
+      - name: patch-cargo-version
+        shell: pwsh
+        working-directory: ${{ env.TAURI_DIR }}/src-tauri
+        run: |
+          $toml = Get-Content "Cargo.toml" -Raw
+          $new = $toml -replace '(?m)^\s*version\s*=\s*"[0-9]+\.[0-9]+\.[0-9]+"\s*$',
+                              "version = ""${{ steps.ver.outputs.version }}"""
+          $new | Set-Content "Cargo.toml" -Encoding UTF8
+
+      # targetディレクトリクリーンアップ
+      - name: clean-old-bundles
+        shell: pwsh
+        working-directory: ${{ env.TAURI_DIR }}/src-tauri
+        run: |
+          if (Test-Path ".\target") {
+            Get-ChildItem -Path ".\target" -Recurse -Include bundle | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+          }
+
+      # tauriビルド
+      - name: tauri-build
+        run: >
+          npx tauri build
+          --config src-tauri/tauri.conf.json
+          --config ${{ steps.ov.outputs.path }}
+        working-directory: ${{ env.TAURI_DIR }}
+
+      # 収集 & 記録（どの版か追跡できるように）
+      - name: collect-and-upload
+        shell: pwsh
+        run: |
+          "Built Version: ${{ steps.ver.outputs.version }}" | Tee-Object -FilePath version.txt
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Get-ChildItem -Recurse "${{ env.TAURI_DIR }}\src-tauri\target\**\bundle\msi\*.msi" |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 2 |
+            Copy-Item -Destination dist
+      
+      - name: upload-artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: msi-${{ steps.ver.outputs.version }}
+          path: |
+            dist/*.msi
+            version.txt
+
+      - name: job-summary
+        shell: bash
+        run: |
+          {
+            echo "## Tauri MSI Build"
+            echo "- Version: **${{ steps.ver.outputs.version }}**"
+            echo "- PR: #${{ github.event.pull_request.number }}"
+            echo "- Commit: \`${{ github.sha }}\`"
+          } >> $GITHUB_STEP_SUMMARY
+
+#========================== Actions側のWindows環境で、PR番号別にバージョン情報を変えることで異なる成果物を作成 ==========================#
