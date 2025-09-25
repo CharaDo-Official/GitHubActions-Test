@@ -49,7 +49,7 @@ jobs:
       # frontendビルド
       - name: build frontend
         run: npm run build
-        working-directory: ./tauri-demo/front
+        working-directory: ${{ env.FRONT_DIR }}
 
 #========================== Actions側のWindows環境で、PR番号別にバージョン情報を変えることで異なる成果物を作成 ==========================#
 
