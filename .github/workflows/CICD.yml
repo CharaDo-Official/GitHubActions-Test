@@ -107,9 +107,9 @@ jobs:
       # tauriビルド
       - name: tauri-build
         run: >
-          npx tauri build
+          npx --yes @tauri-apps/cli@^2 build
           --config ./tauri.conf.json
-          --config ${{ steps.ov.outputs.path }}
+          --config ../runtime/tauri.version.override.json
         working-directory: ${{ env.TAURI_DIR }}
 
       # 収集 & 記録（どの版か追跡できるように）
