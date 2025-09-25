@@ -10,7 +10,8 @@ on:
 
 #ディレクトリ構成に応じて変更してください
 env:
-  TAURI_DIR: ./tauri-demo 
+  TOP_DIR: ./tauri-demo
+  TAURI_DIR: ./tauri-demo/src-tauri
   FRONT_DIR: ./tauri-demo/front
 
 #PR番号が被ったとき、古いActionsを自動停止してくれるらしい
@@ -43,8 +44,8 @@ jobs:
       
       # ESLintチェック
       - name: run ESLint
-        run: npx eslint ./front/src --ext .ts,.tsx,.js,.jsx #typescriptディレクトリのみ対象に
-        working-directory: ./tauri-demo
+        run: npx eslint npx eslint "src/**/*.{js,jsx,ts,tsx}"
+        working-directory: ${{ env.FRONT_DIR }}
 
       # frontendビルド
       - name: build frontend
@@ -59,7 +60,7 @@ jobs:
         shell: pwsh
         working-directory: ${{ env.TAURI_DIR }}
         run: |
-          $jsonPath = "src-tauri/tauri.conf.json"
+          $jsonPath = "./tauri.conf.json"
           $conf = Get-Content $jsonPath -Raw | ConvertFrom-Json
           $base = $conf.version; if (-not $base) { $base = "0.1.0" }
           $p = $base.Split('.')
@@ -74,7 +75,7 @@ jobs:
       - name: make-override-config
         id: ov
         shell: pwsh
-        working-directory: ${{ env.TAURI_DIR }}
+        working-directory: ${{ env.TOP_DIR }}
         run: |
           New-Item -ItemType Directory -Force -Path runtime | Out-Null
           $override = @{ version = "${{ steps.ver.outputs.version }}" } | ConvertTo-Json -Depth 5
@@ -85,7 +86,7 @@ jobs:
       # Cargo.toml の version を実行時だけ合わせる（コミットされない）
       - name: patch-cargo-version
         shell: pwsh
-        working-directory: ${{ env.TAURI_DIR }}/src-tauri
+        working-directory: ${{ env.TAURI_DIR }}
         run: |
           $toml = Get-Content "Cargo.toml" -Raw
           $new = $toml -replace '(?m)^\s*version\s*=\s*"[0-9]+\.[0-9]+\.[0-9]+"\s*$',
@@ -95,7 +96,7 @@ jobs:
       # targetディレクトリクリーンアップ
       - name: clean-old-bundles
         shell: pwsh
-        working-directory: ${{ env.TAURI_DIR }}/src-tauri
+        working-directory: ${{ env.TAURI_DIR }}
         run: |
           if (Test-Path ".\target") {
             Get-ChildItem -Path ".\target" -Recurse -Include bundle | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
@@ -107,7 +108,7 @@ jobs:
       - name: tauri-build
         run: >
           npx tauri build
-          --config src-tauri/tauri.conf.json
+          --config ./tauri.conf.json
           --config ${{ steps.ov.outputs.path }}
         working-directory: ${{ env.TAURI_DIR }}
 
@@ -117,7 +118,7 @@ jobs:
         run: |
           "Built Version: ${{ steps.ver.outputs.version }}" | Tee-Object -FilePath version.txt
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Get-ChildItem -Recurse "${{ env.TAURI_DIR }}\src-tauri\target\**\bundle\msi\*.msi" |
+          Get-ChildItem -Recurse "${{ env.TAURI_DIR }}\target\**\bundle\msi\*.msi" |
             Sort-Object LastWriteTime -Descending | Select-Object -First 2 |
             Copy-Item -Destination dist
       
