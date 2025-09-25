@@ -43,8 +43,8 @@ jobs:
       
       # ESLintチェック
       - name: run ESLint
-        run: npx eslint . --ext .ts,.tsx,.js,.jsx
-        working-directory: ${{ env.FRONT_DIR }}
+        run: npx eslint ${{ env.FRONT_DIR }} --ext .ts,.tsx,.js,.jsx
+        working-directory: .
 
       # frontendビルド
       - name: build frontend
