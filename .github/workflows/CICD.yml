@@ -44,7 +44,7 @@ jobs:
       
       # ESLintチェック
       - name: run ESLint
-        run: npx eslint ./src --ext .ts,.tsx,.js,.jsx #typescriptディレクトリのみ対象に
+        run: npx eslint npx eslint "src/**/*.{js,jsx,ts,tsx}"
         working-directory: ${{ env.FRONT_DIR }}
 
       # frontendビルド
