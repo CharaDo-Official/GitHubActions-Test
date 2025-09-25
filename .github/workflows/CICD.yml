@@ -43,8 +43,8 @@ jobs:
       
       # ESLintチェック
       - name: run ESLint
-        run: npx eslint . --ext .ts,.tsx,.js,.jsx
-        working-directory: ${{ env.FRONT_DIR }}
+        run: npx eslint ./front --ext .ts,.tsx,.js,.jsx
+        working-directory: ./tauri-demo
 
       # frontendビルド
       - name: build frontend
