@@ -10,8 +10,8 @@ on:
 
 #ディレクトリ構成に応じて変更してください
 env:
-  TAURI_APP: ./tauri-app
-  TAURI_SRC: ./tauri-app/src-tauri
+  TAURI_APP: tauri-app
+  TAURI_SRC: tauri-app/src-tauri
 
 #PR番号が被ったとき、古いActionsを自動停止してくれるらしい
 concurrency:
@@ -32,13 +32,13 @@ jobs:
       # node_modulesキャッシュ
       - uses: actions/cache@v4
         with:
-          path: ${{ env.TAURI_APP }}/node_modules
+          path: ${{ github.workspace }}/${{ env.TAURI_APP }}/node_modules
           key: ${{ runner.os }}-npm-${{ hashFiles(format('{0}/package-lock.json', env.TAURI_APP)) }}
           restore-keys: ${{ runner.os }}-npm-
       
       # node_modulesインストール
       - name: install node package
-        run: npm install
+        run: npm ci
         working-directory: ${{ env.TAURI_APP }}
       
       # ESLint実行
@@ -46,18 +46,13 @@ jobs:
         #run: npx eslint "src/**/*.{js,jsx,ts,tsx}"
         #working-directory: ${{ env.TAURI_APP }}
 
-      # frontendビルド
-      - name: build frontend
-        run: npm run build
-        working-directory: ${{ env.TAURI_APP }}
-
-      # tauriビルド
+      # tauriビルド(.msi)
       - name: tauri-build
         run: >
           npm run tauri build
         working-directory: ${{ env.TAURI_APP }}
 
-      # 成果物(msi)アップロードのみ
+      # .msiアップロード
       - name: upload-msi
         uses: actions/upload-artifact@v4
         with:
