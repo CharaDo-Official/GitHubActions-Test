@@ -1,0 +1,60 @@
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Node/Frontend
+node_modules/
+dist/
+.vite/
+.cache/
+.next/
+.nuxt/
+.svelte-kit/
+coverage/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Rust/Tauri
+target/
+src-tauri/target/
+src-tauri/gen/
+
+# Tauri bundle artifacts
+src-tauri/**/bundle/
+*.app
+*.dmg
+*.msi
+*.msix
+*.exe
+*.deb
+*.AppImage
+*.rpm
+*.pkg
+*.snap
+
+# Env & Secrets
+.env
+.env.*
+!/.env.example
+src-tauri/.env
+src-tauri/.env.*
+!src-tauri/.env.example
+
+# Certificates / Signing
+*.pfx
+*.p12
+*.cer
+*.pem
+*.key
+*.mobileprovision
+*.keystore
+*.jks
+
+# IDE
+.vscode/
+.idea/
+*.swp
