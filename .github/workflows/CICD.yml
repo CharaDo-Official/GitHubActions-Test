@@ -43,9 +43,9 @@ jobs:
         working-directory: ${{ env.TAURI_APP }}
       
       # ESLint実行
-      #- name: run ESLint
-        #run: npx eslint "src/**/*.{js,jsx,ts,tsx}"
-        #working-directory: ${{ env.TAURI_APP }}
+      - name: run ESLint
+        run: npm run lint
+        working-directory: ${{ env.TAURI_APP }}
       
       # tauri cache
 
