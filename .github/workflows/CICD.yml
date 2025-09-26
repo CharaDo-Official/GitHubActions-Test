@@ -10,9 +10,8 @@ on:
 
 #ディレクトリ構成に応じて変更してください
 env:
-  TOP_DIR: ./tauri-demo
-  TAURI_DIR: ./src-tauri
-  FRONT_DIR: ./front
+  TAURI_APP: ./tauri-app
+  TAURI_SRC: ./tauri-app/src-tauri
 
 #PR番号が被ったとき、古いActionsを自動停止してくれるらしい
 concurrency:
@@ -33,24 +32,24 @@ jobs:
       # node_modulesキャッシュ
       - uses: actions/cache@v4
         with:
-          path: ${{ env.FRONT_DIR }}/node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles(format('{0}/package-lock.json', env.FRONT_DIR)) }}
+          path: ${{ env.TAURI_APP }}/node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles(format('{0}/package-lock.json', env.TAURI_APP)) }}
           restore-keys: ${{ runner.os }}-npm-
       
-      # frontendのnode_modulesインストール
-      - name: install-frontend
+      # node_modulesインストール
+      - name: install node package
         run: npm install
-        working-directory: ${{ env.FRONT_DIR }}
+        working-directory: ${{ env.TAURI_APP }}
       
       # ESLintチェック
       - name: run ESLint
         run: npx eslint "src/**/*.{js,jsx,ts,tsx}"
-        working-directory: ${{ env.FRONT_DIR }}
+        working-directory: ${{ env.TAURI_APP }}
 
       # frontendビルド
       - name: build frontend
         run: npm run build
-        working-directory: ${{ env.FRONT_DIR }}
+        working-directory: ${{ env.TAURI_APP }}
 
       # tauriビルド
       - name: tauri-build
