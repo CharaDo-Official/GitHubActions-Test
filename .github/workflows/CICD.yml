@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Node(npmキャッシュ込み)
+      # Node
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -34,17 +34,17 @@ jobs:
       # Rust
       - uses: dtolnay/rust-toolchain@stable
 
-      # node_modulesインストール
+      # node_modules
       - name: install node modules
         run: npm ci
         working-directory: ${{ env.TAURI_APP }}
       
-      # ESLint実行
+      # ESLint
       - name: run ESLint
         run: npm run lint
         working-directory: ${{ env.TAURI_APP }}
       
-      # Tauri/Rust キャッシュ
+      # Tauri/Rust
       - name: rustc version
         id: rustc
         shell: pwsh
@@ -70,7 +70,6 @@ jobs:
             ${{ runner.os }}-cargo-target-${{ steps.rustc.outputs.version }}-
             ${{ runner.os }}-cargo-target-
 
-      # tauriビルド(.msi)
       - name: tauri-build
         run: >
           npm run tauri build
