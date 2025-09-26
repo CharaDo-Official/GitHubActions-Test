@@ -1,3 +1,5 @@
+# 自力で環境構築をするのではなく、いったんnpm create tauri-app@latestをしましょう。（1敗）
+
 ### 0 環境
 #### 0.1 開発環境
 - Windows 11  

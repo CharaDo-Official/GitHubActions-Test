@@ -10,9 +10,8 @@ on:
 
 #ディレクトリ構成に応じて変更してください
 env:
-  TOP_DIR: ./tauri-demo
-  TAURI_DIR: ./tauri-demo/src-tauri
-  FRONT_DIR: ./tauri-demo/front
+  TAURI_APP: tauri-app
+  TAURI_SRC: tauri-app/src-tauri
 
 #PR番号が被ったとき、古いActionsを自動停止してくれるらしい
 concurrency:
@@ -23,110 +22,63 @@ jobs:
   build-msi:
     runs-on: windows-latest
     steps:
-      # 環境の構築
       - uses: actions/checkout@v4
+
+      # Node
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
+          cache-dependency-path: ${{ env.TAURI_APP }}/package-lock.json
+      
+      # Rust
       - uses: dtolnay/rust-toolchain@stable
 
-      # node_modulesキャッシュ
-      - uses: actions/cache@v4
-        with:
-          path: ${{ env.FRONT_DIR }}/node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles(format('{0}/package-lock.json', env.FRONT_DIR)) }}
-          restore-keys: ${{ runner.os }}-npm-
+      # node_modules
+      - name: install node modules
+        run: npm ci
+        working-directory: ${{ env.TAURI_APP }}
       
-      # frontendのnode_modulesインストール
-      - name: install-frontend
-        run: npm install
-        working-directory: ${{ env.FRONT_DIR }}
-      
-      # ESLintチェック
+      # ESLint
       - name: run ESLint
-        run: npx eslint "src/**/*.{js,jsx,ts,tsx}"
-        working-directory: ${{ env.FRONT_DIR }}
-
-      # frontendビルド
-      - name: build frontend
-        run: npm run build
-        working-directory: ${{ env.FRONT_DIR }}
-
-#========================== Actions側のWindows環境で、PR番号別にバージョン情報を変えることで異なる成果物を作成 ==========================#
-
-      # 実行時バージョン生成（例: 0.1.1234567）
-      - name: compute-version
-        id: ver
+        run: npm run lint
+        working-directory: ${{ env.TAURI_APP }}
+      
+      # Tauri/Rust
+      - name: rustc version
+        id: rustc
         shell: pwsh
-        working-directory: ${{ env.TAURI_DIR }}
-        run: |
-          $jsonPath = "./tauri.conf.json"
-          $conf = Get-Content $jsonPath -Raw | ConvertFrom-Json
-          $base = $conf.version; if (-not $base) { $base = "0.1.0" }
-          $p = $base.Split('.')
-          $major = [int]$p[0]
-          $minor = if ($p.Length -ge 2) { [int]$p[1] } else { 1 }
-          $pr = ${env:GITHUB_EVENT_NUMBER}; if (-not $pr) { $pr = 0 }
-          $run = ${env:GITHUB_RUN_NUMBER}
-          $patch = [int]("$pr$($run % 10000)")
-          "version=$major.$minor.$patch" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+        run: echo "version=$((rustc -V) -replace '\s+', '_')" >> $env:GITHUB_OUTPUT
 
-      # Tauri v2: バージョン上書き
-      - name: make-override-config
-        id: ov
-        shell: pwsh
-        working-directory: ${{ env.TOP_DIR }}
-        run: |
-          New-Item -ItemType Directory -Force -Path runtime | Out-Null
-          $override = @{ version = "${{ steps.ver.outputs.version }}" } | ConvertTo-Json -Depth 5
-          $path = "runtime/tauri.version.override.json"
-          $override | Out-File -FilePath $path -Encoding utf8
-          "path=$path" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+      - name: cache cargo registry/git
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ steps.rustc.outputs.version }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ steps.rustc.outputs.version }}-
+            ${{ runner.os }}-cargo-
 
-      # Cargo.toml の version を実行時だけ合わせる（コミットされない）
-      - name: patch-cargo-version
-        shell: pwsh
-        working-directory: ${{ env.TAURI_DIR }}
-        run: |
-          $toml = Get-Content "Cargo.toml" -Raw
-          $new = $toml -replace '(?m)^\s*version\s*=\s*"[0-9]+\.[0-9]+\.[0-9]+"\s*$',
-                              "version = ""${{ steps.ver.outputs.version }}"""
-          $new | Set-Content "Cargo.toml" -Encoding UTF8
+      - name: cache cargo target
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TAURI_SRC }}/target
+          key: ${{ runner.os }}-cargo-target-${{ steps.rustc.outputs.version }}-${{ hashFiles(format('{0}/Cargo.lock', env.TAURI_SRC)) }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-target-${{ steps.rustc.outputs.version }}-
+            ${{ runner.os }}-cargo-target-
 
-      # targetディレクトリクリーンアップ
-      - name: clean-old-bundles
-        shell: pwsh
-        working-directory: ${{ env.TAURI_DIR }}
-        run: |
-          if (Test-Path ".\target") {
-            Get-ChildItem -Path ".\target" -Recurse -Include bundle | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-          }
-
-#========================== Actions側のWindows環境で、PR番号別にバージョン情報を変えることで異なる成果物を作成 ==========================#
-
-      # tauriビルド
       - name: tauri-build
         run: >
-          npx --yes @tauri-apps/cli@^2 build
-          --config ./tauri.conf.json
-          --config ../runtime/tauri.version.override.json
-        working-directory: ${{ env.TAURI_DIR }}
+          npm run tauri build
+        working-directory: ${{ env.TAURI_APP }}
 
-      # 収集 & 記録（どの版か追跡できるように）
-      - name: collect-and-upload
-        shell: pwsh
-        run: |
-          "Built Version: ${{ steps.ver.outputs.version }}" | Tee-Object -FilePath version.txt
-          New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Get-ChildItem -Recurse "${{ env.TAURI_DIR }}\target\**\bundle\msi\*.msi" |
-            Sort-Object LastWriteTime -Descending | Select-Object -First 2 |
-            Copy-Item -Destination dist
-      
-      # 成果物(msi)アップロード
-      - name: upload-artifacts
+      # .msiアップロード
+      - name: upload-msi
         uses: actions/upload-artifact@v4
         with:
-          name: msi-${{ steps.ver.outputs.version }}
-          path: |
-            dist/*.msi
-            version.txt
+          name: tauri-proto
+          path: ${{ env.TAURI_SRC }}/target/**/bundle/msi/*.msi
+          if-no-files-found: error
