@@ -22,20 +22,18 @@ jobs:
   build-msi:
     runs-on: windows-latest
     steps:
-      # 環境の構築
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - uses: dtolnay/rust-toolchain@stable
 
-      # node_modulesキャッシュ
+      # Node(npmキャッシュ込み)
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
           cache-dependency-path: ${{ env.TAURI_APP }}/package-lock.json
       
+      # Rust
+      - uses: dtolnay/rust-toolchain@stable
+
       # node_modulesインストール
       - name: install node modules
         run: npm ci
@@ -46,7 +44,31 @@ jobs:
         run: npm run lint
         working-directory: ${{ env.TAURI_APP }}
       
-      # tauri cache
+      # Tauri/Rust キャッシュ
+      - name: rustc version
+        id: rustc
+        shell: pwsh
+        run: echo "version=$((rustc -V) -replace '\s+', '_')" >> $env:GITHUB_OUTPUT
+
+      - name: cache cargo registry/git
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ steps.rustc.outputs.version }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ steps.rustc.outputs.version }}-
+            ${{ runner.os }}-cargo-
+
+      - name: cache cargo target
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TAURI_SRC }}/target
+          key: ${{ runner.os }}-cargo-target-${{ steps.rustc.outputs.version }}-${{ hashFiles(format('{0}/Cargo.lock', env.TAURI_SRC)) }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-target-${{ steps.rustc.outputs.version }}-
+            ${{ runner.os }}-cargo-target-
 
       # tauriビルド(.msi)
       - name: tauri-build
