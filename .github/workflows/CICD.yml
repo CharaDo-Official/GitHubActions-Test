@@ -41,7 +41,7 @@ jobs:
         run: npm install
         working-directory: ${{ env.TAURI_APP }}
       
-      # ESLintチェック
+      # ESLint実行
       #- name: run ESLint
         #run: npx eslint "src/**/*.{js,jsx,ts,tsx}"
         #working-directory: ${{ env.TAURI_APP }}
@@ -54,26 +54,13 @@ jobs:
       # tauriビルド
       - name: tauri-build
         run: >
-          npx --yes @tauri-apps/cli@^2 build
-          --config ./tauri.conf.json
-          --config ../runtime/tauri.version.override.json
-        working-directory: ${{ env.TAURI_DIR }}
+          npm run tauri build
+        working-directory: ${{ env.TAURI_APP }}
 
-      # 収集 & 記録（どの版か追跡できるように）
-      - name: collect-and-upload
-        shell: pwsh
-        run: |
-          "Built Version: ${{ steps.ver.outputs.version }}" | Tee-Object -FilePath version.txt
-          New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Get-ChildItem -Recurse "${{ env.TAURI_DIR }}\target\**\bundle\msi\*.msi" |
-            Sort-Object LastWriteTime -Descending | Select-Object -First 2 |
-            Copy-Item -Destination dist
-      
-      # 成果物(msi)アップロード
-      - name: upload-artifacts
+      # 成果物(msi)アップロードのみ
+      - name: upload-msi
         uses: actions/upload-artifact@v4
         with:
-          name: msi-${{ steps.ver.outputs.version }}
-          path: |
-            dist/*.msi
-            version.txt
+          name: msi
+          path: ${{ env.TAURI_SRC }}/target/**/bundle/msi/*.msi
+          if-no-files-found: error
