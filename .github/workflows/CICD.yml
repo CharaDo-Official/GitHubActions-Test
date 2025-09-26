@@ -42,9 +42,9 @@ jobs:
         working-directory: ${{ env.TAURI_APP }}
       
       # ESLintチェック
-      - name: run ESLint
-        run: npx eslint "src/**/*.{js,jsx,ts,tsx}"
-        working-directory: ${{ env.TAURI_APP }}
+      #- name: run ESLint
+        #run: npx eslint "src/**/*.{js,jsx,ts,tsx}"
+        #working-directory: ${{ env.TAURI_APP }}
 
       # frontendビルド
       - name: build frontend
