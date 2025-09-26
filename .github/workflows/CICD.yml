@@ -11,8 +11,8 @@ on:
 #ディレクトリ構成に応じて変更してください
 env:
   TOP_DIR: ./tauri-demo
-  TAURI_DIR: ./tauri-demo/src-tauri
-  FRONT_DIR: ./tauri-demo/front
+  TAURI_DIR: ./src-tauri
+  FRONT_DIR: ./front
 
 #PR番号が被ったとき、古いActionsを自動停止してくれるらしい
 concurrency:
