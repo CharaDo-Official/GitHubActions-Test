@@ -30,7 +30,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
 
       # node_modulesキャッシュ
-      - name: node modules cache
       - uses: actions/setup-node@v4
         with:
           node-version: 20
