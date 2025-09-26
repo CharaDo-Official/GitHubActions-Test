@@ -46,6 +46,8 @@ jobs:
       #- name: run ESLint
         #run: npx eslint "src/**/*.{js,jsx,ts,tsx}"
         #working-directory: ${{ env.TAURI_APP }}
+      
+      # tauri cache
 
       # tauriビルド(.msi)
       - name: tauri-build
@@ -57,6 +59,6 @@ jobs:
       - name: upload-msi
         uses: actions/upload-artifact@v4
         with:
-          name: msi
+          name: tauri-proto
           path: ${{ env.TAURI_SRC }}/target/**/bundle/msi/*.msi
           if-no-files-found: error
